@@ -1,44 +1,12 @@
-var map = L.map('map').setView([51.505, -0.09], 13);
+
+//Initialize the Map with tile layer from open street map
+var map = L.map('map').setView([39.82, -98.58], 5);
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 }).addTo(map);
-var marker = L.marker([51.5, -0.09]).addTo(map);
-var circle = L.circle([51.508, -0.11], {
-    color: 'red',
-    fillColor: '#f03',
-    fillOpacity: 0.5,
-    radius: 500
-}).addTo(map);
-var polygon = L.polygon([
-    [51.509, -0.08],
-    [51.503, -0.06],
-    [51.51, -0.047]
-]).addTo(map);
-marker.bindPopup("<b>Hello world!</b><br>I am a popup.").openPopup();
-circle.bindPopup("I am a circle.");
-polygon.bindPopup("I am a polygon.");
-var popup = L.popup()
-    .setLatLng([51.513, -0.09])
-    .setContent("I am a standalone popup.")
-    .openOn(map);
-    function onMapClick(e) {
-        alert("You clicked the map at " + e.latlng);
-    }
-    
-    map.on('click', onMapClick);
-    var popup = L.popup();
 
-function onMapClick(e) {
-    popup
-        .setLatLng(e.latlng)
-        .setContent("You clicked the map at " + e.latlng.toString())
-        .openOn(map);
-}
-
-map.on('click', onMapClick);
-
-//L.geoJSON(geojsonFeature).addTo(map);
+//create line features
 var myLines = [{
     "type": "LineString",
     "coordinates": [[-100, 40], [-105, 45], [-110, 55]]
@@ -46,15 +14,6 @@ var myLines = [{
     "type": "LineString",
     "coordinates": [[-105, 40], [-110, 45], [-115, 55]]
 }];
-var myLines = [{
-    "type": "LineString",
-    "coordinates": [[-100, 40], [-105, 45], [-110, 55]]
-}, {
-    "type": "LineString",
-    "coordinates": [[-105, 40], [-110, 45], [-115, 55]]
-}];
-
-
 
 var myStyle = {
     "color": "#ff7800",
@@ -66,6 +25,7 @@ L.geoJSON(myLines, {
     style: myStyle
 }).addTo(map);
 
+//Creates the polygon for states and labels them by color
 var states = [{
     "type": "Feature",
     "properties": {"party": "Republican"},
@@ -103,6 +63,7 @@ L.geoJSON(states, {
     }
 }).addTo(map);
 
+//This should create a point feature on the map
 var geojsonMarkerOptions = {
     radius: 8,
     fillColor: "#ff7800",
@@ -118,13 +79,14 @@ L.geoJSON(someGeojsonFeature, {
     }
 }).addTo(map);
 
+//This adds the popup feature when clicked
 function onEachFeature(feature, layer) {
-    // does this feature have a property named popupContent?
     if (feature.properties && feature.properties.popupContent) {
         layer.bindPopup(feature.properties.popupContent);
     }
 }
 
+//This adds in the marker for the Coors Field on teh map
 var geojsonFeature = {
     "type": "Feature",
     "properties": {
@@ -140,31 +102,4 @@ var geojsonFeature = {
 
 L.geoJSON(geojsonFeature, {
     onEachFeature: onEachFeature
-}).addTo(map);
-var someFeatures = [{
-    "type": "Feature",
-    "properties": {
-        "name": "Coors Field",
-        "show_on_map": true
-    },
-    "geometry": {
-        "type": "Point",
-        "coordinates": [-104.99404, 39.75621]
-    }
-}, {
-    "type": "Feature",
-    "properties": {
-        "name": "Busch Field",
-        "show_on_map": false
-    },
-    "geometry": {
-        "type": "Point",
-        "coordinates": [-104.98404, 39.74621]
-    }
-}];
-
-L.geoJSON(someFeatures, {
-    filter: function(feature, layer) {
-        return feature.properties.show_on_map;
-    }
 }).addTo(map);

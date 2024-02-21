@@ -1,8 +1,13 @@
+//Initialize map
 var map = L.map('map').setView([51.505, -0.09], 13);
+
+//Add tile layer to Map using OpenStreetMap
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 }).addTo(map);
+
+//Add in Marker and Circle Feature
 var marker = L.marker([51.5, -0.09]).addTo(map);
 var circle = L.circle([51.508, -0.11], {
     color: 'red',
@@ -15,6 +20,8 @@ var polygon = L.polygon([
     [51.503, -0.06],
     [51.51, -0.047]
 ]).addTo(map);
+
+//Add in popup in specified area
 marker.bindPopup("<b>Hello world!</b><br>I am a popup.").openPopup();
 circle.bindPopup("I am a circle.");
 polygon.bindPopup("I am a polygon.");
@@ -22,6 +29,8 @@ var popup = L.popup()
     .setLatLng([51.513, -0.09])
     .setContent("I am a standalone popup.")
     .openOn(map);
+
+    //Interactive feature that displays a message followed by the lat/long
     function onMapClick(e) {
         alert("You clicked the map at " + e.latlng);
     }
