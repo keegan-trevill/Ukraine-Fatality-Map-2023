@@ -22,7 +22,7 @@ function createMap(){
 
 
 //Calculates the 
-function calcStats(data) {
+function calcStats(data, attribute) {
     // Initialize dataStats object to store statistics
     //var dataStats = {};
     console.log(data)
@@ -31,31 +31,28 @@ function calcStats(data) {
     var nonZeroCount = 0;
     var sum = 0;
     // Iterate through each feature
-    data.features.forEach(feature => {
-        // Access the properties object of the current feature
-        var properties = feature.properties;
-        // Extract the required data from properties
-        for (var key in properties) {
-            if (key.startsWith('d_')) {
-                var value = properties[key];
-                if (!isNaN(value)) {
-                    if (value !== 0) {
-                        sum += value;
-                        nonZeroCount++;
-                    }
-                    allValues.push(value);
-                }
-            }
+    data.features.forEach(function(feature) {
+        var value = Number(feature.properties[attribute]);
+
+        if (!isNaN(value) && value > 0) {
+            allValues.push(value);
         }
     });
+
+    if (allValues.length === 0) {
+        dataStats.min = 0;
+        dataStats.max = 0;
+        dataStats.mean = 0;
+        return dataStats;
+    }
     
 
     // Calculate statistics
-    dataStats.min = 52;
+    dataStats.min = Math.min(...allValues);
     dataStats.max = Math.max(...allValues);
     var sum = allValues.reduce(function (a, b) { return a + b; }, 0);
     console.log(sum)
-    dataStats.mean = 183.37 ;
+    dataStats.mean = sum / allValues.length; ;
 
     // Log statistics to console
     console.log("Minimum:", dataStats.min);
@@ -86,7 +83,7 @@ function calcPropRadius(attValue) {
 
 //Step 1: Create new sequence controls
 //Create new sequence controls
-function createSequenceControls(attributes){   
+function createSequenceControls(attributes, data){   
     var SequenceControl = L.Control.extend({
         options: {
             position: 'bottomleft'
@@ -135,7 +132,7 @@ function createSequenceControls(attributes){
             //Step 8: update slider
             document.querySelector('.range-slider').value = index;
             console.log(index);
-            updatePropSymbols(attributes[index]);
+            updatePropSymbols(attributes[index], data);
         })
     })
 
@@ -144,11 +141,12 @@ function createSequenceControls(attributes){
         //Step 6: get the new index value
         var index = this.value;
         console.log(index)
-        updatePropSymbols(attributes[index]);
+        updatePropSymbols(attributes[index], data);
     });
 }
 
-function updatePropSymbols(attribute){
+function updatePropSymbols(attribute, data){
+    calcStats(data, attribute);
     console.log(attribute)
     createLegend(attribute);
     map.eachLayer(function(layer){
@@ -157,13 +155,13 @@ function updatePropSymbols(attribute){
                 var props = layer.feature.properties;
     
                 //update each feature's radius based on new attribute values
-                var radius = calcPropRadius(props[attribute]);
+                var radius = calcPropRadius(Number(props[attribute]));
                 layer.setRadius(radius);
     
                 var popupContent = new PopupContent(props, attribute);
                 //update popup with new content    
-                popup = layer.getPopup();    
-                popup.setContent(popupContent.formatted).update();
+                    
+                layer.getPopup().setContent(popupContent.formatted).update();
 
                 
             };
@@ -179,11 +177,12 @@ function processData(data) {
         for (var key in properties) {
             if (key.startsWith('d_') && !attributes.includes(key)) {
                 attributes.push(key);
+                console.log(attributes)
             }
         }
     });
 
-    console.log(attributes);
+    //console.log(attributes);
     return attributes;
 }
 
@@ -196,9 +195,10 @@ function getData(map){
         .then(function(json){
              //create an attributes array
             var attributes = processData(json);
-            calcStats(json); 
+            calcStats(json, attributes[0]); 
             createPropSymbols(json, attributes);
-            createSequenceControls(attributes);
+            createSequenceControls(attributes, json);
+            createLegend(attributes[0]);
              
         })
 };
@@ -325,7 +325,7 @@ function createLegend(attributes) {
         var cy = 55 - radius;
 
         // Circle string            
-        svg += '<circle class="legend-circle" id="' + circles[i] + '" r="' + radius + '"cy="' + cy + '" fill="#F47821" fill-opacity="0.8" stroke="#000000" cx="30"/>';
+        svg += '<circle class="legend-circle" id="' + circles[i] + '" r="' + radius + '" cy="' + cy + '" fill="#F47821" fill-opacity="0.8" stroke="#000000" cx="30"/>';
 
         // Evenly space out labels            
         var textY = i * 20 + 20;

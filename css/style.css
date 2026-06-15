@@ -1,6 +1,6 @@
 /*Add CSS styles here*/
 #map {
-    height: 400px;
+    height: 100vh;
     width: 100%;
     display: inline-block;
 }
